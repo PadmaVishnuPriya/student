@@ -31,13 +31,21 @@ const LoginPage = () => {
       localStorage.setItem('userType', userType)
       localStorage.setItem('userName', response.data.user.name)
       localStorage.setItem('userId', response.data.user.id)
+      // Store class & section for students (null-safe)
+      const sc = response.data.user.studentClass
+      const sec = response.data.user.section
+
+      localStorage.setItem('studentClass', (sc !== null && sc !== undefined) ? sc : '')
+      localStorage.setItem('section', sec || '')
 
       // Update AuthContext immediately
       setUser({
         token: response.data.token,
         userType: userType,
         name: response.data.user.name,
-        id: response.data.user.id
+        id: response.data.user.id,
+        studentClass: (sc !== null && sc !== undefined) ? Number(sc) : null,
+        section: sec || null
       })
 
       // Redirect based on user type

@@ -18,6 +18,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["admin", "faculty", "student"],
     default: "student"
+  },
+  studentClass: {
+    type: Number,
+    enum: [6, 7, 8, 9, 10, null],
+    default: null
+  },
+  section: {
+    type: String,
+    enum: ["A", "B", "C", null],
+    default: null
   }
 }, { timestamps: true });
 

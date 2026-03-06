@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 // 🔹 Register
 exports.registerUser = async (req, res) => {
   try {
-    const { name, email, password, userType } = req.body;
+    const { name, email, password, userType, studentClass, section } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -14,12 +14,20 @@ exports.registerUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({
+    const userData = {
       name,
       email,
       password: hashedPassword,
       role: userType || "student"
-    });
+    };
+
+    // Save class & section for students
+    if ((userType || "student") === "student") {
+      if (studentClass) userData.studentClass = Number(studentClass);
+      if (section) userData.section = section;
+    }
+
+    const newUser = await User.create(userData);
 
     res.status(201).json({
       message: "User Registered Successfully ✅",
@@ -27,7 +35,9 @@ exports.registerUser = async (req, res) => {
         id: newUser._id,
         name: newUser.name,
         email: newUser.email,
-        role: newUser.role
+        role: newUser.role,
+        studentClass: newUser.studentClass,
+        section: newUser.section
       }
     });
 
@@ -70,7 +80,9 @@ exports.loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        userType: user.role
+        userType: user.role,
+        studentClass: user.studentClass || null,
+        section: user.section || null
       }
     });
 
@@ -79,10 +91,16 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-// 🔹 Get All Students
+// 🔹 Get Students (optionally filtered by class & section)
 exports.getStudents = async (req, res) => {
   try {
-    const students = await User.find({ role: "student" }).select("-password");
+    const { class: studentClass, section } = req.query;
+    const filter = { role: "student" };
+
+    if (studentClass) filter.studentClass = Number(studentClass);
+    if (section) filter.section = section;
+
+    const students = await User.find(filter).select("-password");
     res.json(students);
   } catch (error) {
     res.status(500).json({ message: error.message });

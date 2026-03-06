@@ -13,6 +13,8 @@ const RegisterPage = () => {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [userType, setUserType] = useState(userTypeFromUrl)
+  const [studentClass, setStudentClass] = useState('')
+  const [section, setSection] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
@@ -42,12 +44,16 @@ const RegisterPage = () => {
       return
     }
 
+    // Validation for studentClass removed — now optional
+
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/users/register`, {
         name,
         email,
         password,
-        userType
+        userType,
+        studentClass: userType === 'student' ? Number(studentClass) : null,
+        section: userType === 'student' ? section : null
       })
 
       setSuccess('Registration successful! Redirecting to login...')
@@ -108,13 +114,46 @@ const RegisterPage = () => {
             <select
               id="userType"
               value={userType}
-              onChange={(e) => setUserType(e.target.value)}
+              onChange={(e) => {
+                setUserType(e.target.value)
+                setStudentClass('')
+                setSection('')
+              }}
             >
               <option value="student">Student</option>
               <option value="faculty">Faculty</option>
               <option value="admin">Admin</option>
             </select>
           </div>
+
+          {userType === 'student' && (
+            <div className="form-row" style={{ display: 'flex', gap: '15px' }}>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label htmlFor="studentClass">Class</label>
+                <select
+                  id="studentClass"
+                  value={studentClass}
+                  onChange={(e) => setStudentClass(e.target.value)}
+                  required
+                >
+                  <option value="">-- Class --</option>
+                  {[6, 7, 8, 9, 10].map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label htmlFor="section">Section</label>
+                <select
+                  id="section"
+                  value={section}
+                  onChange={(e) => setSection(e.target.value)}
+                  required
+                >
+                  <option value="">-- Section --</option>
+                  {['A', 'B', 'C'].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="password">Password</label>

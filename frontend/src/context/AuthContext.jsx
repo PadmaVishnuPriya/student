@@ -11,13 +11,26 @@ export const AuthProvider = ({ children }) => {
     const userType = localStorage.getItem('userType')
     const userName = localStorage.getItem('userName')
     const userId = localStorage.getItem('userId')
-    
+    const studentClassRaw = localStorage.getItem('studentClass')
+    const sectionRaw = localStorage.getItem('section')
+
     if (token && userType) {
+      // Fix: Handle 'null' string from localStorage and ensure valid Number or null
+      const parsedClassNum = studentClassRaw && studentClassRaw !== 'null' && studentClassRaw !== ''
+        ? Number(studentClassRaw)
+        : null
+
+      const parsedSection = (sectionRaw && sectionRaw !== 'null' && sectionRaw !== '')
+        ? sectionRaw
+        : null
+
       setUserState({
         token,
         userType,
         name: userName || 'User',
-        id: userId
+        id: userId,
+        studentClass: (parsedClassNum !== null && !isNaN(parsedClassNum)) ? parsedClassNum : null,
+        section: parsedSection
       })
     }
     setLoading(false)
@@ -32,6 +45,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('userType')
     localStorage.removeItem('userName')
     localStorage.removeItem('userId')
+    localStorage.removeItem('studentClass')
+    localStorage.removeItem('section')
     setUserState(null)
   }
 

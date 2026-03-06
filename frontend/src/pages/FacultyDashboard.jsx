@@ -10,11 +10,19 @@ function formatDate(dt) {
   return new Date(dt).toLocaleString()
 }
 
+const CLASSES = [6, 7, 8, 9, 10]
+const SECTIONS = ['A', 'B', 'C']
+
 const FacultyDashboard = () => {
   const navigate = useNavigate()
   const { user, logout } = useContext(AuthContext)
+
+  // Class & Section selectors — must both be chosen before data loads
+  const [selectedClass, setSelectedClass] = useState('')
+  const [selectedSection, setSelectedSection] = useState('')
+
   const [students, setStudents] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [selectedStudent, setSelectedStudent] = useState(null)
@@ -35,16 +43,18 @@ const FacultyDashboard = () => {
   const [showDebug, setShowDebug] = useState(false)
   const [metricsList, setMetricsList] = useState([])
 
+  // Load data on mount or when selectors change
   useEffect(() => {
     fetchStudents()
     fetchMetrics()
-  }, [])
+  }, [selectedClass, selectedSection])
   const fetchMetrics = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/metrics`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/metrics?class=${selectedClass}&section=${selectedSection}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
       setMetricsList(response.data || [])
     } catch (err) {
       // ignore for now
@@ -52,17 +62,17 @@ const FacultyDashboard = () => {
   }
 
   const fetchStudents = async () => {
+    setLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/users/students`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/users/students?class=${selectedClass}&section=${selectedSection}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
       const sortedStudents = (response.data || []).sort((a, b) => a.name.localeCompare(b.name))
       setStudents(sortedStudents)
     } catch (err) {
       console.error("Fetch Students Error:", err);
-      // Don't show error on screen for fetch failure to avoid scaring user if it's just empty
-      // But maybe good for debugging now
       if (err.message === "Network Error") {
         setError(`Cannot connect to server at ${import.meta.env.VITE_API_BASE_URL}. Is it running?`)
       }
@@ -80,14 +90,16 @@ const FacultyDashboard = () => {
     }
 
     try {
-      console.log("Attempting to key add student to:", `${import.meta.env.VITE_API_BASE_URL}/api/users/register`);
+      console.log("Attempting to add student to:", `${import.meta.env.VITE_API_BASE_URL}/api/users/register`);
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/api/users/register`,
         {
           name: newStudentForm.name,
           email: newStudentForm.email,
           password: newStudentForm.password,
-          userType: 'student'
+          userType: 'student',
+          studentClass: selectedClass,
+          section: selectedSection
         }
       )
 
@@ -97,7 +109,9 @@ const FacultyDashboard = () => {
         _id: created.id,
         name: created.name,
         email: created.email,
-        role: created.role || 'student'
+        role: created.role || 'student',
+        studentClass: created.studentClass,
+        section: created.section
       }
 
       // Prepend to students list so UI updates immediately
@@ -254,11 +268,68 @@ const FacultyDashboard = () => {
       {error && <div className="error-banner">{error}</div>}
       {successMsg && <div className="success-banner">{successMsg}</div>}
 
+      {/* ── Class & Section Selector ── */}
+      <div className="class-section-selector" style={{
+        display: 'flex', alignItems: 'center', gap: 16,
+        background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)',
+        border: '1.5px solid rgba(255,255,255,0.25)', borderRadius: 12,
+        padding: '14px 20px', margin: '0 0 20px 0', flexWrap: 'wrap'
+      }}>
+        <span style={{ fontWeight: 600, fontSize: '1rem', color: '#fff', marginRight: 8 }}>
+          📚 Select Class & Section:
+        </span>
+        <select
+          value={selectedClass}
+          onChange={e => { setSelectedClass(e.target.value); setSelectedSection(''); setSelectedStudent(null) }}
+          style={{
+            padding: '8px 14px', borderRadius: 8,
+            border: '2px solid #7c6ff7',
+            background: '#fff', color: '#333',
+            fontSize: '0.95rem', fontWeight: 600,
+            cursor: 'pointer', minWidth: 140
+          }}
+        >
+          <option value="">-- Select Class --</option>
+          {CLASSES.map(c => (
+            <option key={c} value={c}>Class {c}</option>
+          ))}
+        </select>
+
+        <select
+          value={selectedSection}
+          disabled={!selectedClass}
+          onChange={e => { setSelectedSection(e.target.value); setSelectedStudent(null) }}
+          style={{
+            padding: '8px 14px', borderRadius: 8,
+            border: '2px solid #7c6ff7',
+            background: selectedClass ? '#fff' : '#e8e8e8',
+            color: selectedClass ? '#333' : '#999',
+            fontSize: '0.95rem', fontWeight: 600,
+            cursor: selectedClass ? 'pointer' : 'not-allowed', minWidth: 150,
+            opacity: selectedClass ? 1 : 0.7
+          }}
+        >
+          <option value="">-- Select Section --</option>
+          {SECTIONS.map(s => (
+            <option key={s} value={s}>Section {s}</option>
+          ))}
+        </select>
+
+        {selectedClass && selectedSection && (
+          <span style={{
+            background: 'rgba(255,255,255,0.2)', borderRadius: 20,
+            padding: '5px 14px', color: '#fff', fontWeight: 700, fontSize: '0.9rem'
+          }}>
+            📋 Class {selectedClass} – Section {selectedSection}
+          </span>
+        )}
+      </div>
+
       <div className="faculty-content">
         {/* Add Student Section */}
         <div className="add-student-section">
           <div className="section-header">
-            <h2>Add New Student</h2>
+            <h2>Add New Student — Class {selectedClass}, Section {selectedSection}</h2>
             <button
               className="btn-toggle"
               onClick={() => setShowAddStudent(!showAddStudent)}
@@ -315,6 +386,20 @@ const FacultyDashboard = () => {
                     onChange={(e) => setNewStudentForm({ ...newStudentForm, confirmPassword: e.target.value })}
                     required
                   />
+                </div>
+              </div>
+
+              {/* Class & Section are pre-filled from the selector — shown as read-only info */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Class (auto-filled)</label>
+                  <input type="text" value={`Class ${selectedClass}`} readOnly
+                    style={{ background: 'rgba(255,255,255,0.1)', cursor: 'not-allowed', opacity: 0.8 }} />
+                </div>
+                <div className="form-group">
+                  <label>Section (auto-filled)</label>
+                  <input type="text" value={`Section ${selectedSection}`} readOnly
+                    style={{ background: 'rgba(255,255,255,0.1)', cursor: 'not-allowed', opacity: 0.8 }} />
                 </div>
               </div>
 
@@ -420,7 +505,7 @@ const FacultyDashboard = () => {
 
         {/* Students List */}
         <div className="students-list-section">
-          <h2>Students List (Total: {students.length})</h2>
+          <h2>Students List — Class {selectedClass}, Section {selectedSection} (Total: {students.length})</h2>
           <div className="students-list">
             {students.map(student => (
               <div
@@ -501,7 +586,6 @@ const FacultyDashboard = () => {
             </table>
           </div>
         </div>
-
 
       </div>
 

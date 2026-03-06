@@ -119,10 +119,23 @@ exports.addMetrics = async (req, res) => {
   }
 };
 
-// 🔹 Get All Metrics
+// 🔹 Get All Metrics (optionally filtered by class & section)
 exports.getAllMetrics = async (req, res) => {
   try {
-    const metrics = await Metrics.find().populate('studentId');
+    const { class: studentClass, section } = req.query;
+    let metrics = await Metrics.find().populate('studentId');
+
+    // Filter by class and/or section if query params are provided
+    if (studentClass || section) {
+      metrics = metrics.filter(m => {
+        const u = m.studentId;
+        if (!u) return false;
+        if (studentClass && u.studentClass !== Number(studentClass)) return false;
+        if (section && u.section !== section) return false;
+        return true;
+      });
+    }
+
     res.json(metrics);
   } catch (error) {
     res.status(500).json({ message: error.message });
