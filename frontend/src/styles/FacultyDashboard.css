@@ -1,9 +1,9 @@
 .metrics-table-section {
   background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
+  padding: 48px;
+  border-radius: 20px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.14);
+  margin-bottom: 40px;
   grid-column: 1 / -1;
 }
 .metrics-table-scroll {
@@ -12,17 +12,18 @@
 .metrics-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 .metrics-table th, .metrics-table td {
-  padding: 8px 12px;
+  padding: 20px 26px;
   border: 1px solid #ddd;
   text-align: center;
+  font-size: 1.1rem;
 }
 .metrics-table th {
   background: #f3f3f3;
   color: #333;
-  font-weight: 600;
+  font-weight: 700;
 }
 .metrics-table td {
   background: #fafaff;
@@ -36,60 +37,62 @@
 .faculty-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  padding: 40px;
 }
 
 .faculty-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 20px 30px;
-  border-radius: 15px;
-  margin-bottom: 30px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.98);
+  padding: 36px 48px;
+  border-radius: 22px;
+  margin-bottom: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 
 .faculty-header .header-left h1 {
   margin: 0;
   color: #333;
-  font-size: 28px;
+  font-size: 4rem;
 }
 
 .faculty-header .header-left p {
-  margin: 5px 0 0 0;
-  color: #666;
-  font-size: 14px;
+  margin: 8px 0 0 0;
+  color: #555;
+  font-size: 1.8rem;
 }
 
 .faculty-header .header-right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 28px;
 }
 
 .faculty-header .user-info {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 0 20px;
+  gap: 18px;
+  padding: 0 24px;
   border-left: 2px solid #ddd;
 }
 
 .faculty-header .user-info span {
-  font-weight: 600;
+  font-weight: 700;
   color: #333;
+  font-size: 1.25rem;
 }
 
 .faculty-header .btn-logout {
-  padding: 8px 20px;
+  padding: 18px 32px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 14px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   transition: all 0.3s ease;
+  font-size: 1.2rem;
 }
 
 .faculty-header .btn-logout:hover {
@@ -118,14 +121,14 @@
 .faculty-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  gap: 50px;
 }
 
 .add-student-section {
   background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  padding: 48px;
+  border-radius: 22px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.14);
   grid-column: 1 / -1;
 }
 
@@ -133,54 +136,55 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 32px;
 }
 
 .section-header h2 {
   margin: 0;
   color: #333;
+  font-size: 2.6rem;
 }
 
 .btn-toggle {
-  padding: 8px 16px;
+  padding: 18px 32px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 14px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   transition: all 0.3s ease;
-  font-size: 14px;
+  font-size: 1.3rem;
 }
 
 .btn-toggle:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 10px 24px rgba(102, 126, 234, 0.4);
 }
 
 .student-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 24px;
 }
 
 .student-form .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .student-form .form-group label {
-  font-weight: 600;
+  font-weight: 700;
   color: #333;
-  font-size: 14px;
+  font-size: 1.15rem;
 }
 
 .student-form .form-group input {
-  padding: 12px;
+  padding: 18px;
   border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 12px;
+  font-size: 1.05rem;
   transition: border-color 0.3s ease;
   font-family: inherit;
 }
@@ -192,60 +196,61 @@
 
 .student-form .btn-submit {
   grid-column: 1 / -1;
-  padding: 12px;
+  padding: 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
+  border-radius: 12px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 16px;
+  font-size: 1.2rem;
 }
 
 .student-form .btn-submit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 }
 
 .metrics-form-section {
   background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  padding: 42px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   grid-column: 1;
 }
 
 .metrics-form-section h2 {
   margin-top: 0;
   color: #333;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
+  font-size: 2.2rem;
 }
 
 .metrics-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 26px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .form-group label {
-  font-weight: 600;
+  font-weight: 700;
   color: #333;
-  font-size: 14px;
+  font-size: 1.1rem;
 }
 
 .form-group select,
 .form-group input {
-  padding: 12px;
+  padding: 18px;
   border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 12px;
+  font-size: 1.05rem;
   transition: border-color 0.3s ease;
   font-family: inherit;
 }
@@ -259,31 +264,31 @@
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 15px;
+  gap: 22px;
 }
 
 .btn-submit {
-  padding: 12px;
+  padding: 18px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
+  border-radius: 12px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 16px;
+  font-size: 1.2rem;
 }
 
 .btn-submit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 }
 
 .students-list-section {
   background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  padding: 44px;
+  border-radius: 20px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
   grid-column: 2;
   display: flex;
   flex-direction: column;
@@ -292,7 +297,8 @@
 .students-list-section h2 {
   margin-top: 0;
   color: #333;
-  margin-bottom: 20px;
+  margin-bottom: 26px;
+  font-size: 2.2rem;
 }
 
 .students-list {
@@ -300,16 +306,16 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
 .student-item {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 15px;
+  gap: 20px;
+  padding: 22px;
   border: 2px solid #ddd;
-  border-radius: 10px;
+  border-radius: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -326,15 +332,15 @@
 }
 
 .student-item .student-avatar {
-  width: 45px;
-  height: 45px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background: rgba(102, 126, 234, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 18px;
+  font-weight: 800;
+  font-size: 22px;
   color: #667eea;
   flex-shrink: 0;
 }

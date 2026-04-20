@@ -77,52 +77,84 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="login-container">
-      <div className="login-header">
-        <h1>Adharsh Vidhyala</h1>
-        <h2>Student Trust Score System</h2>
-      </div>
-      <div className="login-cards">
-        {/* Admin login card removed */}
+    <div className="login-wrapper">
+      <div className="content-container">
 
-        <div className="login-card faculty-card">
-          <div className="card-content">
-            <h2>Faculty</h2>
-            <button
-              className="btn btn-primary"
-              onClick={() => handleOpenModal('faculty')}
-            >
-              Login
-            </button>
+        {/* Left Side / Top Area (Hero + Stats) */}
+        <div className="info-section">
+          <div className="top-badge">
+            <span className="badge-dot"></span> EST. 2001 • COIMBATORE
+          </div>
+
+          <div className="hero-section">
+            <h1 className="title-adharsh">Adharsh</h1>
+            <h1 className="title-vidhyala">Vidhyala</h1>
+            <p className="hero-subtitle">
+              Empowering students through transparent academic trust & performance tracking.
+            </p>
+          </div>
+
+          <div className="stats-containment">
+            <div className="stats-row">
+              <div className="stat-block">
+                <div className="stat-number">2.4<span className="stat-suffix">K</span></div>
+                <div className="stat-label">STUDENTS</div>
+              </div>
+              <div className="stat-block">
+                <div className="stat-number">180</div>
+                <div className="stat-label">FACULTY</div>
+              </div>
+              <div className="stat-block">
+                <div className="stat-number">96<span className="stat-suffix">%</span></div>
+                <div className="stat-label">TRUST SCORE AVG</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="login-card student-card">
-          <div className="card-content">
-            <h2>Student</h2>
-            <button
-              className="btn btn-primary"
-              onClick={() => handleOpenModal('student')}
-            >
-              Login
-            </button>
+        {/* Right Side / Bottom Area (Login Card) */}
+        <div className="main-card">
+          <div className="card-top-bar">
+            <div className="brand-logo">🎓</div>
+            <div className="brand-titles">
+              <h3>Secure Portal</h3>
+              <p>SELECT YOUR ROLE TO CONTINUE</p>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {showModal && (
-        <div className="login-modal show">
-          <div className="modal-content">
-            <button
-              className="close-btn"
-              onClick={handleCloseModal}
+          <div className="card-divider"></div>
+
+          <div className="selection-label">I AM A</div>
+
+          <div className="role-grid">
+            <div
+              className={`role-box ${userType === 'faculty' ? 'selected' : ''}`}
+              onClick={() => { setUserType('faculty'); setError(''); }}
             >
-              ✕
-            </button>
+              {userType === 'faculty' && <div className="selected-badge">✓</div>}
+              <div className="role-emoji">👩‍🏫</div>
+              <div className="role-title">Faculty</div>
+            </div>
 
-            <h2>Login as {userType.charAt(0).toUpperCase() + userType.slice(1)}</h2>
+            <div
+              className={`role-box ${userType === 'student' ? 'selected' : ''}`}
+              onClick={() => { setUserType('student'); setError(''); }}
+            >
+              {userType === 'student' && <div className="selected-badge">✓</div>}
+              <div className="role-emoji">🎓</div>
+              <div className="role-title">Student</div>
+            </div>
+          </div>
 
-            {error && <div className="error-message">{error}</div>}
+          {/* Inline Login Form */}
+          <div className="inline-login-form">
+            <h3 className="form-title">
+              Login as {userType.charAt(0).toUpperCase() + userType.slice(1)}
+            </h3>
+
+            <div className="form-alert-container">
+              {error && <div className="error-message">{error}</div>}
+            </div>
 
             <form onSubmit={handleLogin}>
               <div className="form-group">
@@ -151,19 +183,24 @@ const LoginPage = () => {
 
               <button
                 type="submit"
-                className="btn btn-submit"
+                className="btn-submit"
                 disabled={loading}
               >
-                {loading ? 'Logging in...' : 'Login'}
+                {loading ? 'Logging in...' : 'Sign In'}
               </button>
             </form>
 
             <p className="register-link">
-              Don't have an account? <a onClick={() => handleRegisterClick(userType)}>Register here</a>
+              New to Adharsh Vidhyala? <a onClick={() => handleRegisterClick(userType)}>Create an account</a>
             </p>
           </div>
         </div>
-      )}
+
+      </div>
+
+      <footer className="page-footer">
+        © 2025 Adharsh Vidhyala • Student Trust Score System • All rights reserved
+      </footer>
     </div>
   )
 }

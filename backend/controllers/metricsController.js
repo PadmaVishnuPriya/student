@@ -18,8 +18,7 @@ exports.addMetrics = async (req, res) => {
       studentId,
       attendance, // { daysAttended, totalDays }
       exams,      // [80, 90, 70]
-      assignments,// { submittedOnTime, totalAssignments }
-      improvement // { currentAvg, previousAvg }
+      assignments // { submittedOnTime, totalAssignments }
     } = req.body;
 
     // 1. Calculate Attendance (A)
@@ -33,49 +32,18 @@ exports.addMetrics = async (req, res) => {
     const AS = (assignments.submittedOnTime / assignments.totalAssignments) * 100;
 
     // 4. Calculate Improvement Score (I)
-    // Auto-calculate Current Average from this exam set
-    const currentAvg = Number(E) || 0;
-
-    // Fetch previous metrics for this student to get Previous Average
-    const previousMetrics = await Metrics.findOne({ studentId }).sort({ createdAt: -1 });
-
-    // DEBUG LOGS
-    console.log("DEBUG: previousMetrics found:", !!previousMetrics);
-    if (previousMetrics) console.log("DEBUG: previousMetrics examAverage:", previousMetrics.examAverage);
-
-    // Safe lookup: if previousMetrics exists but examAverage is undefined (old schema), default to 0
-    let previousAvg = 0;
-    if (previousMetrics && previousMetrics.examAverage !== undefined && previousMetrics.examAverage !== null) {
-      previousAvg = Number(previousMetrics.examAverage);
-    }
-
-    console.log("DEBUG: Calculated previousAvg:", previousAvg);
-
-    // Improvement % = (Current - Previous) / Previous * 100
-    // Rule:
-    // If > 0 -> Use Improvement %
-    // If = 0 -> 5
-    // If < 0 -> 0 (or if previous is 0, maybe handle specifically)
-    let I = 0;
-    let improvementPercentage = 0;
-
-    if (previousAvg === 0) {
-      // If no previous record, we can't calculate improvement % accurately.
+    // Fetch previous metrics for this student to get previous exam average
+    const previousMetrics = await Metrics.find({ studentId }).sort({ createdAt: -1 }).limit(1);
+    const previousAvg = previousMetrics.length > 0 ? previousMetrics[0].examAverage : 0;
+    const improvementPercentage = previousAvg > 0 ? ((E - previousAvg) / previousAvg) * 100 : 0;
+    let I;
+    if (improvementPercentage > 10) {
+      I = 10.67;
+    } else if (improvementPercentage > 0) {
       I = 5;
-      improvementPercentage = 0;
     } else {
-      improvementPercentage = ((currentAvg - previousAvg) / previousAvg) * 100;
-
-      if (improvementPercentage > 0) {
-        I = improvementPercentage;
-      } else if (improvementPercentage === 0) {
-        I = 5;
-      } else {
-        I = 0;
-      }
+      I = 0;
     }
-
-    console.log("DEBUG: I:", I, "improvementPercentage:", improvementPercentage);
 
     const trustScore = calculateTrustScore(A, E, AS, I);
 
@@ -98,7 +66,7 @@ exports.addMetrics = async (req, res) => {
         percentage: safeFixed(AS)
       },
       improvement: {
-        currentAvg: safeFixed(currentAvg),
+        currentAvg: safeFixed(E),
         previousAvg: safeFixed(previousAvg),
         percentage: safeFixed(improvementPercentage),
         score: safeFixed(I)
