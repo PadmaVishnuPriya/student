@@ -6,34 +6,40 @@ const metricsSchema = new mongoose.Schema({
     ref: "User",
     required: true
   },
-  // 1. Attendance (A)
   attendance: {
     daysAttended: { type: Number, required: true },
     totalDays: { type: Number, required: true },
-    percentage: { type: Number } // Store calculated %
+    percentage: { type: Number }
   },
-  // 2. Exam Average (E)
   exams: [
-    { type: Number, required: true } // Array of marks
+    { type: Number, required: true }
   ],
-  examAverage: { type: Number }, // Store calculated avg
-
-  // 3. Assignment Score (AS)
+  examAverage: { type: Number },
   assignments: {
     submittedOnTime: { type: Number, required: true },
     totalAssignments: { type: Number, required: true },
-    percentage: { type: Number } // Store calculated %
+    percentage: { type: Number }
   },
-
-  // 4. Improvement Score (I)
-  improvement: {
-    currentAvg: { type: Number, required: true },
-    previousAvg: { type: Number, required: true },
-    percentage: { type: Number }, // Raw improvement %
-    score: { type: Number } // Final score (10.67 or 5 or 0)
+  sports: {
+    participation: { type: Number, required: true },
+    totalActivities: { type: Number, required: true },
+    percentage: { type: Number }
   },
-
-  // Final Trust Score
+  extraCurricular: {
+    participation: { type: Number, required: true },
+    totalActivities: { type: Number, required: true },
+    percentage: { type: Number }
+  },
+  rewards: {
+    firstPrize: { type: Number, default: 0 },
+    secondPrize: { type: Number, default: 0 },
+    thirdPrize: { type: Number, default: 0 },
+    bonusPercentage: { type: Number, default: 0 }
+  },
+  baseTrustScore: {
+    type: Number,
+    default: 0
+  },
   trustScore: {
     type: Number,
     default: 0

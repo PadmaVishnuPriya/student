@@ -18,6 +18,9 @@ const DashboardOverview = ({ selectedClass, selectedSection }) => {
     avgAttendance: 0,
     avgExamScore: 0,
     avgAssignmentScore: 0,
+    avgSportsScore: 0,
+    avgExtraCurricularScore: 0,
+    avgRewardsBonus: 0,
     topPerformer: null,
     needsAttention: [],
   });
@@ -34,30 +37,20 @@ const DashboardOverview = ({ selectedClass, selectedSection }) => {
     try {
       const token = localStorage.getItem("token");
       const [studentsRes, metricsRes] = await Promise.all([
-        axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/api/users/students?class=${selectedClass}&section=${selectedSection}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        ),
-        axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/api/metrics?class=${selectedClass}&section=${selectedSection}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        ),
+        axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/users/students?class=${selectedClass}&section=${selectedSection}`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/metrics?class=${selectedClass}&section=${selectedSection}`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
 
       const students = studentsRes.data || [];
       const metrics = metricsRes.data || [];
-
       const latestMetricsByStudent = new Map();
+
       metrics.forEach((metric) => {
         const studentKey = metric.studentId?._id || metric.studentId || metric.studentName;
         if (!studentKey) return;
-
         const previousMetric = latestMetricsByStudent.get(studentKey);
         const currentCreatedAt = new Date(metric.createdAt || 0).getTime();
-        const previousCreatedAt = previousMetric
-          ? new Date(previousMetric.createdAt || 0).getTime()
-          : 0;
-
+        const previousCreatedAt = previousMetric ? new Date(previousMetric.createdAt || 0).getTime() : 0;
         if (!previousMetric || currentCreatedAt >= previousCreatedAt) {
           latestMetricsByStudent.set(studentKey, metric);
         }
@@ -66,27 +59,20 @@ const DashboardOverview = ({ selectedClass, selectedSection }) => {
       const latestMetrics = Array.from(latestMetricsByStudent.values());
       const metricCount = latestMetrics.length;
 
-      const totals = latestMetrics.reduce(
-        (acc, metric) => {
-          acc.trust += Number(metric.trustScore || 0);
-          acc.attendance += Number(metric.attendance?.percentage || 0);
-          acc.exam += Number(metric.examAverage || 0);
-          acc.assignment += Number(metric.assignments?.percentage || 0);
-          return acc;
-        },
-        { trust: 0, attendance: 0, exam: 0, assignment: 0 }
-      );
+      const totals = latestMetrics.reduce((acc, metric) => {
+        acc.trust += Number(metric.trustScore || 0);
+        acc.attendance += Number(metric.attendance?.percentage || 0);
+        acc.exam += Number(metric.examAverage || 0);
+        acc.assignment += Number(metric.assignments?.percentage || 0);
+        acc.sports += Number(metric.sports?.percentage || 0);
+        acc.extra += Number(metric.extraCurricular?.percentage || 0);
+        acc.rewards += Number(metric.rewards?.bonusPercentage || 0);
+        return acc;
+      }, { trust: 0, attendance: 0, exam: 0, assignment: 0, sports: 0, extra: 0, rewards: 0 });
 
-      const topMetric = [...latestMetrics].sort(
-        (a, b) => Number(b.trustScore || 0) - Number(a.trustScore || 0)
-      )[0];
-
+      const topMetric = [...latestMetrics].sort((a, b) => Number(b.trustScore || 0) - Number(a.trustScore || 0))[0];
       const needsAttention = [...latestMetrics]
-        .sort((a, b) => {
-          const scoreDifference = Number(a.trustScore || 0) - Number(b.trustScore || 0);
-          if (scoreDifference !== 0) return scoreDifference;
-          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
-        })
+        .sort((a, b) => Number(a.trustScore || 0) - Number(b.trustScore || 0))
         .slice(0, 3)
         .map((metric) => ({
           name: metric.studentId?.name || metric.studentName || "Unknown",
@@ -99,6 +85,9 @@ const DashboardOverview = ({ selectedClass, selectedSection }) => {
         avgAttendance: metricCount ? totals.attendance / metricCount : 0,
         avgExamScore: metricCount ? totals.exam / metricCount : 0,
         avgAssignmentScore: metricCount ? totals.assignment / metricCount : 0,
+        avgSportsScore: metricCount ? totals.sports / metricCount : 0,
+        avgExtraCurricularScore: metricCount ? totals.extra / metricCount : 0,
+        avgRewardsBonus: metricCount ? totals.rewards / metricCount : 0,
         topPerformer: topMetric?.studentId?.name || topMetric?.studentName || null,
         needsAttention,
       });
@@ -110,101 +99,28 @@ const DashboardOverview = ({ selectedClass, selectedSection }) => {
   };
 
   if (!selectedClass || !selectedSection) {
-    return (
-      <div
-        style={{
-          background: "white",
-          padding: "60px 48px",
-          borderRadius: "20px",
-          textAlign: "center",
-          color: "#9ca3af",
-          fontSize: "24px",
-        }}
-      >
-        Please select a class and section to view overview
-      </div>
-    );
+    return <div style={{ background: "white", padding: "60px 48px", borderRadius: "20px", textAlign: "center", color: "#9ca3af", fontSize: "24px" }}>Please select a class and section to view overview</div>;
   }
 
   if (loading) {
-    return (
-      <div
-        style={{
-          background: "white",
-          padding: "48px",
-          borderRadius: "20px",
-          textAlign: "center",
-          color: "#6b7280",
-          fontSize: "20px",
-        }}
-      >
-        Loading class overview...
-      </div>
-    );
+    return <div style={{ background: "white", padding: "48px", borderRadius: "20px", textAlign: "center", color: "#6b7280", fontSize: "20px" }}>Loading class overview...</div>;
   }
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "24px" }}>
-      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
-        <div style={{ fontSize: "42px", marginBottom: "14px" }}>Students</div>
-        <div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Total Students</div>
-        <div style={{ fontSize: "44px", fontWeight: "700" }}>{stats.totalStudents}</div>
-      </div>
-
-      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" }}>
-        <div style={{ fontSize: "42px", marginBottom: "14px" }}>Trust</div>
-        <div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Class Avg Trust Score</div>
-        <div style={{ fontSize: "44px", fontWeight: "700" }}>{formatPercent(stats.avgTrustScore)}</div>
-      </div>
-
-      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)" }}>
-        <div style={{ fontSize: "42px", marginBottom: "14px" }}>Attendance</div>
-        <div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Class Avg Attendance</div>
-        <div style={{ fontSize: "44px", fontWeight: "700" }}>{formatPercent(stats.avgAttendance)}</div>
-      </div>
-
-      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%)" }}>
-        <div style={{ fontSize: "42px", marginBottom: "14px" }}>Exams</div>
-        <div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Class Avg Exam Score</div>
-        <div style={{ fontSize: "44px", fontWeight: "700" }}>{formatPercent(stats.avgExamScore)}</div>
-      </div>
-
-      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)" }}>
-        <div style={{ fontSize: "42px", marginBottom: "14px" }}>Assignments</div>
-        <div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Class Avg Assignment Score</div>
-        <div style={{ fontSize: "44px", fontWeight: "700" }}>{formatPercent(stats.avgAssignmentScore)}</div>
-      </div>
-
-      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)" }}>
-        <div style={{ fontSize: "42px", marginBottom: "14px" }}>Top</div>
-        <div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Top Performer</div>
-        <div style={{ fontSize: "24px", fontWeight: "700", lineHeight: 1.3 }}>
-          {stats.topPerformer || "No data yet"}
-        </div>
-      </div>
-
+      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}><div style={{ fontSize: "42px", marginBottom: "14px" }}>Students</div><div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Total Students</div><div style={{ fontSize: "44px", fontWeight: "700" }}>{stats.totalStudents}</div></div>
+      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" }}><div style={{ fontSize: "42px", marginBottom: "14px" }}>Trust</div><div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Class Avg Final Trust Score</div><div style={{ fontSize: "44px", fontWeight: "700" }}>{formatPercent(stats.avgTrustScore)}</div></div>
+      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)" }}><div style={{ fontSize: "42px", marginBottom: "14px" }}>Attendance</div><div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Class Avg Attendance</div><div style={{ fontSize: "44px", fontWeight: "700" }}>{formatPercent(stats.avgAttendance)}</div></div>
+      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%)" }}><div style={{ fontSize: "42px", marginBottom: "14px" }}>Exams</div><div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Class Avg Exam Score</div><div style={{ fontSize: "44px", fontWeight: "700" }}>{formatPercent(stats.avgExamScore)}</div></div>
+      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)" }}><div style={{ fontSize: "42px", marginBottom: "14px" }}>Assignments</div><div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Class Avg Assignment Score</div><div style={{ fontSize: "44px", fontWeight: "700" }}>{formatPercent(stats.avgAssignmentScore)}</div></div>
+      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)" }}><div style={{ fontSize: "42px", marginBottom: "14px" }}>Sports</div><div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Class Avg Sports Score</div><div style={{ fontSize: "44px", fontWeight: "700" }}>{formatPercent(stats.avgSportsScore)}</div></div>
+      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%)" }}><div style={{ fontSize: "42px", marginBottom: "14px" }}>Extra</div><div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Class Avg Extra-Curricular</div><div style={{ fontSize: "44px", fontWeight: "700" }}>{formatPercent(stats.avgExtraCurricularScore)}</div></div>
+      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #f9d423 0%, #ff4e50 100%)" }}><div style={{ fontSize: "42px", marginBottom: "14px" }}>Rewards</div><div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Avg Rewards Bonus</div><div style={{ fontSize: "44px", fontWeight: "700" }}>+{formatPercent(stats.avgRewardsBonus)}</div></div>
+      <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)" }}><div style={{ fontSize: "42px", marginBottom: "14px" }}>Top</div><div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "10px" }}>Top Performer</div><div style={{ fontSize: "24px", fontWeight: "700", lineHeight: 1.3 }}>{stats.topPerformer || "No data yet"}</div></div>
       <div style={{ ...baseCardStyle, background: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)" }}>
         <div style={{ fontSize: "42px", marginBottom: "14px" }}>Alert</div>
         <div style={{ fontSize: "14px", opacity: 0.9, marginBottom: "16px" }}>Needs Attention</div>
-        {stats.needsAttention.length > 0 ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            {stats.needsAttention.map((student, idx) => (
-              <div
-                key={`${student.name}-${idx}`}
-                style={{
-                  background: "rgba(255,255,255,0.2)",
-                  borderRadius: "10px",
-                  padding: "10px 12px",
-                }}
-              >
-                <div style={{ fontSize: "15px", fontWeight: "700" }}>{student.name}</div>
-                <div style={{ fontSize: "13px", opacity: 0.95 }}>Trust Score: {student.score}%</div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ fontSize: "18px", fontWeight: "700" }}>No low scores yet</div>
-        )}
+        {stats.needsAttention.length > 0 ? stats.needsAttention.map((student, idx) => <div key={`${student.name}-${idx}`} style={{ background: "rgba(255,255,255,0.2)", borderRadius: "10px", padding: "10px 12px", marginBottom: "10px" }}><div style={{ fontSize: "15px", fontWeight: "700" }}>{student.name}</div><div style={{ fontSize: "13px", opacity: 0.95 }}>Trust Score: {student.score}%</div></div>) : <div style={{ fontSize: "18px", fontWeight: "700" }}>No low scores yet</div>}
       </div>
     </div>
   );
