@@ -180,22 +180,6 @@ Frontend runs on:
 http://localhost:3000
 ```
 
-## Temporary Public Access
-
-For temporary sharing, the backend can be exposed with ngrok.
-
-Example:
-
-```bash
-ngrok http 5001
-```
-
-Then use the generated public URL in:
-
-```env
-VITE_API_BASE_URL=https://your-ngrok-url.ngrok-free.dev
-```
-
 ## API Areas
 
 ### User Routes
